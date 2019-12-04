@@ -1,1 +1,12 @@
 /* You can add global styles to this file, and also import other style files */
+
+.abt-padding {
+  padding-top: 10px;
+}
+.margin-lft-5 {
+  margin-left: 5px;
+}
+.margin-lft-10 {
+  margin-left: 10px;
+}
+
