@@ -1,8 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import * as Stomp from 'stompjs';
-import * as SockJS from 'sockjs-client';
 import {webSocket, WebSocketSubject} from "rxjs/webSocket";
-import {Subject} from "rxjs";
 
 @Component({
   selector: 'app-cna-socket',
@@ -15,37 +12,31 @@ export class CnaSocketComponent implements OnInit {
   stompClient: any;
   greeting: any;
   name: string;
-  private socket: WebSocket;
+  private socket: WebSocketSubject<Mess>;
 
 
   constructor() {
   }
 
   ngOnInit() {
-    this.socket = new WebSocket('ws://localhost:8080/websocket-endpoint');
   }
 
 
   rxconnect() {
-    // let subject: WebSocketSubject =  webSocket("ws://localhost:8080/websocket-endpoint");
-    // subject.subscribe(datafromserverA=>console.log(datafromserverA));
-    /*  const observableA = subject.multiplex(
-        () => ({subscribe: 'A'}),s // When server gets this message, it will start sending messages for 'A'...
-        () => ({unsubscribe: 'A'}), // ...and when gets this one, it will stop.
-        message => true // If the function returns `true` message is passed down the stream. Skipped if the function returns false.
-      );
-      const subA = observableA.subscribe(messageForA => console.log(messageForA));
-     */
-    /*subject.asObservable().pipe().subscribe(
-      msg => console.log('message received: ' + msg), // Called whenever there is a message from the server.
-      err => console.log(err), // Called if at any point WebSocket API signals some kind of error.
-      () => console.log('closed') // Called when connection is closed (for whatever reason).
-    );*/
+    this.socket = webSocket("ws://localhost:8084/socket");
+
+    this.socket.asObservable.subscribe(
+      msg => console.log(msg),
+      err => console.log(err),
+      () => console.log('complete'));
+
+    this.socket.next('hello');
+
 
   }
 
   _connect() {
-    this.socket = new WebSocket('ws://localhost:8080/websocket-endpoint');
+    /*this.socket = new WebSocket('ws://localhost:8080/websocket-endpoint');
     var that = this;
     this.socket.onopen = function (event) {
       console.log('websocket is open now\n' + event);
@@ -57,17 +48,18 @@ export class CnaSocketComponent implements OnInit {
     };
     this.socket.onmessage = function (event) {
       console.log(event.data);
-    }
-  }
-  ;
+    }*/
+  };
 
   _disconnect() {
-    this.socket.close();
+    if (this.socket != undefined || this.socket != null) {
+      this.socket.unsubscribe();
+    }
   }
 
 // on error, schedule a reconnection attempt
   errorCallBack(error) {
-    console.log("errorCallBack -> " + error)
+    console.log("errorCallBack -> " + error);
     setTimeout(() => {
       this._connect();
     }, 5000);
