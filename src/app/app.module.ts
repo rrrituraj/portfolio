@@ -9,6 +9,8 @@ import { AboutComponent } from './about/about.component';
 import { AngularFontAwesomeModule } from 'angular-font-awesome';
 import { ResumeComponent } from './resume/resume.component';
 import { ContactComponent } from './contact/contact.component';
+import { CnaSocketComponent } from './cna-socket/cna-socket.component';
+import { FormsModule } from '@angular/forms';
 
 const routes: Routes = [
   {path:'', component:PortfolioComponent},
@@ -24,12 +26,14 @@ const routes: Routes = [
     HeaderComponent,
     AboutComponent,
     ResumeComponent,
-    ContactComponent
+    ContactComponent,
+    CnaSocketComponent
   ],
   imports: [
     BrowserModule,
     RouterModule.forRoot(routes),
-    AngularFontAwesomeModule
+    AngularFontAwesomeModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
