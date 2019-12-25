@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {webSocket, WebSocketSubject} from "rxjs/webSocket";
+import {webSocket} from "rxjs/webSocket";
 
 @Component({
   selector: 'app-cna-socket',
@@ -12,7 +12,7 @@ export class CnaSocketComponent implements OnInit {
   stompClient: any;
   greeting: any;
   name: string;
-  private socket: WebSocketSubject<Mess>;
+  private socket: any;
 
 
   constructor() {
@@ -23,14 +23,18 @@ export class CnaSocketComponent implements OnInit {
 
 
   rxconnect() {
+    let header = {
+      caseId: this.name
+    };
+
     this.socket = webSocket("ws://localhost:8084/socket");
 
-    this.socket.asObservable.subscribe(
+    this.socket.subscribe(
       msg => console.log(msg),
       err => console.log(err),
       () => console.log('complete'));
 
-    this.socket.next('hello');
+    this.socket.next(JSON.stringify(header));
 
 
   }
