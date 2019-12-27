@@ -1,37 +1,45 @@
 <!--<button class="btn btn-info" (click)="_connect()">connect</button>-->
 <div id="main-content" class="container">
-
-  <div class="row">
-    <div class="col-md-12">
-      {{ greeting }}
-    </div>
-  </div>
-
   <div class="row">
     <div class="col-md-6">
+      <input [(ngModel)]="caseId" class="form-control">
       <form class="form-inline">
         <div class="form-group">
-          <div><label for="connect">WebSocket connection:</label></div>
           <div>
-            <!--<button (click)="_connect()" class="btn btn-info" type="submit">Connect</button>-->
-            <button (click)="rxconnect()" class="btn btn-info" type="submit">rxConnect</button>
-            <button (click)="_disconnect()" class="btn btn-danger" type="submit">Disconnect
-            </button>
+            <button (click)="rxconnect()" class="btn btn-success form-control" type="submit">rxConnect</button>
+            <button (click)="_disconnect()" class="btn btn-danger form-control" type="submit">Disconnect</button>
           </div>
         </div>
       </form>
     </div>
-    <div class="col-md-6">
+    <!--<div class="col-md-6">
       <form class="form-inline">
         <div class="form-group">
           <label for="name">Id</label>
           <input type="text" [(ngModel)]="name" class="form-control" name="name"> <br>
         </div>
-        <!--<button (click)="_send('message')" class="btn btn-default" type="submit">Send</button>-->
+        &lt;!&ndash;<button (click)="_send('message')" class="btn btn-default" type="submit">Send</button>&ndash;&gt;
       </form>
-    </div>
+    </div>-->
 
-    <p> {{ greeting }}</p>
+    <!--    <p> {{ greeting }}</p>-->
+  </div>
+
+  <div>
+    <table class="table table-striped">
+      <thead>
+      <tr>
+        <th>Index</th>
+        <th>Narrative</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let case of cases; let i=index">
+        <td>{{i}}</td>
+        <td>{{case}}</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 
 </div>

@@ -7,36 +7,67 @@ import {webSocket} from "rxjs/webSocket";
   styleUrls: ['./cna-socket.component.css']
 })
 export class CnaSocketComponent implements OnInit {
-  webSocketEndPoint: string = 'http://localhost:8080/websocket-endpoint';
-  topic: string = '/queue/greeting';
   stompClient: any;
   greeting: any;
   name: string;
   private socket: any;
+  cases = [];
+  caseId = 100005;
 
 
   constructor() {
   }
 
-  ngOnInit() {
+  static onClose() {
+    console.log("connection closed");
   }
 
-
-  rxconnect() {
-    let header = {
-      caseId: this.name
-    };
-
-    this.socket = webSocket("ws://localhost:8084/socket");
+  ngOnInit() {
+    this.socket = webSocket("ws://172.168.1.176:8080/cna/socket");
 
     this.socket.subscribe(
-      msg => console.log(msg),
-      err => console.log(err),
-      () => console.log('complete'));
+      msg => this.received(msg),
+      err => this.onError(err),
+      () => CnaSocketComponent.onClose()
+    )
+  }
 
-    this.socket.next(JSON.stringify(header));
+  showGreeting(body: any) {
+    if (body != undefined && !(body instanceof String)) {
+      let data = JSON.stringify(body);
+      this.cases.push(data);
+    } else {
+      this.cases.push(body);
+    }
+  }
 
+  rxconnect() {
+    this.send();
+  }
 
+  received(event) {
+    if (this.socket == null || this.socket == undefined) {
+      this.ngOnInit();
+    }
+    this.showGreeting(event)
+  }
+
+  send() {
+    let header = {
+      case_id: this.caseId,
+      case_narrative: true
+    };
+
+    this.socket.next(header);
+  }
+
+  onError(event) {
+    console.log("error received");
+    setTimeout(() => {
+      if (this.socket != null || this.socket != undefined) {
+        this.ngOnInit();
+      }
+    }, 5000);
   }
 
   _connect() {
@@ -56,8 +87,10 @@ export class CnaSocketComponent implements OnInit {
   };
 
   _disconnect() {
-    if (this.socket != undefined || this.socket != null) {
-      this.socket.unsubscribe();
+    let self = this;
+    if (self.socket != undefined || self.socket != null) {
+      self.socket.unsubscribe();
+      self.socket = null;
     }
   }
 
