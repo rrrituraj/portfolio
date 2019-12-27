@@ -1,37 +1,32 @@
-<!--<button class="btn btn-info" (click)="_connect()">connect</button>-->
-<div id="main-content" class="container">
-
+<p>WebSocket Form</p>
+<div class="margin-lft-10 form-group sticky-top">
   <div class="row">
-    <div class="col-md-12">
-      {{ greeting }}
-    </div>
+    <input [(ngModel)]="caseId" class="form-control" placeholder="Case Id..">
   </div>
-
-  <div class="row">
-    <div class="col-md-6">
-      <form class="form-inline">
-        <div class="form-group">
-          <div><label for="connect">WebSocket connection:</label></div>
-          <div>
-            <button (click)="_connect()" class="btn btn-info" type="submit">Connect</button>
-            <button (click)="rxconnect()" class="btn btn-info" type="submit">rxConnect</button>
-            <button (click)="_disconnect()" class="btn btn-danger" type="submit">Disconnect
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-    <div class="col-md-6">
-      <form class="form-inline">
-        <div class="form-group">
-          <label for="name">What is your name?</label>
-          <input type="text" [(ngModel)]="name" class="form-control" name="name"> <br>
-        </div>
-        <button (click)="_send('message')" class="btn btn-default" type="submit">Send</button>
-      </form>
-    </div>
-
-    <p> {{ greeting }}</p>
+  <div class="row margin-top-5">
+    <!--<button class="btn btn-primary" (click)="connect()">stomp-connect</button>-->
+    <button (click)="webconnect_rx()" class="btn btn-success margin-lft-5">web-connect</button>
+    <button (click)="disconnect()" class="btn btn-danger margin-lft-5">disconnect</button>
   </div>
+</div>
 
+
+<!--<div>{{cases}}</div>-->
+<div>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>Index</th>
+      <th class="align-content-center">Case narrative</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let case of cases ; let i=index">
+      <td>{{i}}</td>
+      <td>
+        {{case}}
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>

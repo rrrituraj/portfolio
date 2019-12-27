@@ -1,8 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
-import {webSocket, WebSocketSubject} from "rxjs/webSocket";
-import {Subject} from "rxjs";
+import {webSocket} from "rxjs/webSocket";
 
 @Component({
   selector: 'app-cna-socket',
@@ -10,85 +9,119 @@ import {Subject} from "rxjs";
   styleUrls: ['./cna-socket.component.css']
 })
 export class CnaSocketComponent implements OnInit {
-  webSocketEndPoint: string = 'http://localhost:8080/websocket-endpoint';
-  topic: string = '/queue/greeting';
-  stompClient: any;
-  greeting: any;
-  name: string;
-  private socket: WebSocket;
 
+  caseId = '100005';
+  private serverUrl = 'http://172.168.1.176:8080/cna/websocket-casenarrative';
+  private stompClient;
+  private cases = [];
+  private socket: WebSocket;
+  private subject: any;
 
   constructor() {
   }
 
+  static onError(event) {
+    console.log('error in websocket');
+    console.log(event);
+  }
+
+  static onClose() {
+    console.log('complete and closing');
+  }
+
   ngOnInit() {
-    this.socket = new WebSocket('ws://localhost:8080/websocket-endpoint');
+    this.subject = webSocket('ws://172.168.1.176:8080/cna/socket');
+    this.subject.subscribe(
+      msg => this.showGreeting(msg), // Called whenever there is a message from the server.
+      err => CnaSocketComponent.onError(err), // Called if at any point WebSocket API signals some kind of error.
+      () => CnaSocketComponent.onClose() // Called when connection is closed (for whatever reason).
+    );
   }
 
-
-  rxconnect() {
-    // let subject: WebSocketSubject =  webSocket("ws://localhost:8080/websocket-endpoint");
-    // subject.subscribe(datafromserverA=>console.log(datafromserverA));
-    /*  const observableA = subject.multiplex(
-        () => ({subscribe: 'A'}),s // When server gets this message, it will start sending messages for 'A'...
-        () => ({unsubscribe: 'A'}), // ...and when gets this one, it will stop.
-        message => true // If the function returns `true` message is passed down the stream. Skipped if the function returns false.
-      );
-      const subA = observableA.subscribe(messageForA => console.log(messageForA));
-     */
-    /*subject.asObservable().pipe().subscribe(
-      msg => console.log('message received: ' + msg), // Called whenever there is a message from the server.
-      err => console.log(err), // Called if at any point WebSocket API signals some kind of error.
-      () => console.log('closed') // Called when connection is closed (for whatever reason).
-    );*/
-
+  showGreeting(body: any) {
+    let data;
+    if (body != undefined) {
+      // data = JSON.parse(body);
+      data = JSON.stringify(body);
+    }
+    this.cases.push(data);
   }
 
-  _connect() {
-    this.socket = new WebSocket('ws://localhost:8080/websocket-endpoint');
-    var that = this;
-    this.socket.onopen = function (event) {
-      console.log('websocket is open now\n' + event);
-      var header = {
-        msg: 'hello veere',
-        id: "10"
-      };
-      that.socket.send(JSON.stringify(header));
+  connect = function () {
+    var self = this;
+    let header = {
+      queueId: Math.random().toString(36).substring(7),
+      caseId: self.caseId,
+      // caseId: "2018_013145",
+      caseNarrative: true
     };
-    this.socket.onmessage = function (event) {
-      console.log(event.data);
+    let sockJsProtocols = ["xhr-streaming", "xhr-polling"];
+    let socket = new SockJS(self.serverUrl, null, {transport: sockJsProtocols});
+
+    self.stompClient = Stomp.over(socket);
+
+    self.stompClient.connect(header, function (frame) {
+      // setConnected(true);
+
+      console.log('Connected: ' + frame);
+      self.stompClient.subscribe('/queue/' + header.queueId, function (greeting) {
+        self.showGreeting(greeting.body);
+      });
+    });
+  };
+
+  webconnect() {
+    let header = {
+      case_id: this.caseId,
+      case_narrative: true
+    };
+    let self = this;
+    self.close();
+    // this.socket = new WebSocket('ws://172.168.1.176:6777/socket');
+    this.socket = new WebSocket('ws://172.168.1.176:8080/cna/socket');
+    // this.socket = new WebSocket('ws://172.168.1.159:8084/socket');
+
+    this.socket.onopen = function (event) {
+      console.log(event);
+      self.socket.send(JSON.stringify(header));
+    };
+
+    this.socket.onmessage = function (ev) {
+      self.showGreeting(ev.data);
+    };
+
+    this.socket.onclose = function (event) {
+      console.log('received error');
+    };
+
+    this.socket.onerror = function (event) {
+      CnaSocketComponent.onError(event);
     }
   }
-  ;
 
-  _disconnect() {
-    this.socket.close();
+  webconnect_rx() {
+    let header = {
+      case_id: this.caseId,
+      case_narrative: true
+    };
+    this.subject.next(header);
+  };
+
+  close() {
+    let self = this;
+    this.cases = [];
+    if (self.socket != undefined || self.socket != null) {
+      self.socket.close();
+    }
+    self.subject.unsubscribe();
   }
 
-// on error, schedule a reconnection attempt
-  errorCallBack(error) {
-    console.log("errorCallBack -> " + error)
-    setTimeout(() => {
-      this._connect();
-    }, 5000);
-  }
-
-  /**
-   * Send message to sever via web socket
-   * @param {*} message
-   */
-  _send(message) {
-    console.log("calling logout api via web socket");
-    this.stompClient.send("/app/hello", {}, JSON.stringify(message));
-  }
-
-  onMessageReceived(message) {
-    console.log("Message Recieved from Server :: " + message);
-    this.handleMessage(JSON.stringify(message.body));
-  }
-
-  handleMessage(message) {
-    this.greeting = message;
+  disconnect = function () {
+    if (this.stompClient != undefined && this.stompClient !== null) {
+      this.stompClient.disconnect();
+    }
+    this.close();
+    console.log("Disconnected");
   }
 
 }
