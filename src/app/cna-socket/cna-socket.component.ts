@@ -24,6 +24,7 @@ export class CnaSocketComponent implements OnInit {
 
   ngOnInit() {
     this.socket = webSocket("ws://172.168.1.176:8080/cna/socket");
+    // this.socket = webSocket("ws://172.168.1.159:8084/socket");
 
     this.socket.subscribe(
       msg => this.received(msg),
@@ -42,6 +43,7 @@ export class CnaSocketComponent implements OnInit {
   }
 
   rxconnect() {
+    this.cases = [];
     this.send();
   }
 
@@ -58,7 +60,12 @@ export class CnaSocketComponent implements OnInit {
       case_narrative: true
     };
 
-    this.socket.next(header);
+    if (!this.socket.closed) {
+      this.socket.next(header);
+    } else {
+      this.ngOnInit();
+      this.socket.next(header);
+    }
   }
 
   onError(event) {
@@ -90,7 +97,8 @@ export class CnaSocketComponent implements OnInit {
     let self = this;
     if (self.socket != undefined || self.socket != null) {
       self.socket.unsubscribe();
-      self.socket = null;
+      // self.socket = null;
+      this.cases = [];
     }
   }
 

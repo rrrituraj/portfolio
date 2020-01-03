@@ -11,6 +11,8 @@ import { ResumeComponent } from './resume/resume.component';
 import { ContactComponent } from './contact/contact.component';
 import { CnaSocketComponent } from './cna-socket/cna-socket.component';
 import { FormsModule } from '@angular/forms';
+import { CnaRestComponent } from './cna-rest/cna-rest.component';
+import { HttpClientModule } from '@angular/common/http';
 
 const routes: Routes = [
   {path:'', component:PortfolioComponent},
@@ -27,10 +29,12 @@ const routes: Routes = [
     AboutComponent,
     ResumeComponent,
     ContactComponent,
-    CnaSocketComponent
+    CnaSocketComponent,
+    CnaRestComponent
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     RouterModule.forRoot(routes),
     AngularFontAwesomeModule,
     FormsModule
